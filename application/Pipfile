@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = {extras = ["all"], version = "*"}
+boto3 = "*"
+bcrypt = "==4.0.1"
+jose = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+botocore = "*"
+pydantic = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
