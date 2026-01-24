@@ -1,14 +1,18 @@
-from typing import Optional, List
-from src.repository.audit_repository import AuditRepo
-from src.models.audit_log import AuditLog
+from typing import List
+
 from src.enums.user_role import Role
-from src.exceptions.app_exceptions import BadRequestException, InternalServerException,NotFoundException,AuditServiceError
+from src.exceptions.app_exceptions import (
+    AuditServiceError,
+    BadRequestException,
+)
+from src.models.audit_log import AuditLog
+from src.repository.audit_repository import AuditRepo
+
 
 class AuditService:
     def __init__(self, audit_repo: AuditRepo):
         self.audit_repo = audit_repo
 
-    
     async def get_all_audit_logs(self, user_ctx: dict) -> List[AuditLog]:
         if not user_ctx:
             raise BadRequestException("unauthorized or invalid user context")

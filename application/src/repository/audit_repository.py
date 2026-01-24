@@ -1,18 +1,16 @@
-from src.setup.api_settings import AppSettings 
-from boto3.dynamodb.types import TypeDeserializer,TypeSerializer
+from typing import List
+
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+from src.exceptions.app_exceptions import InternalServerException, NotFoundException
 from src.models.audit_log import AuditLog
-from src.enums.document_status import DocumentStatus
-from src.exceptions.app_exceptions import InternalServerException,NotFoundException
-from typing import List,Optional
-from datetime import datetime, timezone
-
-
+from src.setup.api_settings import AppSettings
 
 settings = AppSettings()
 
+
 class AuditRepo:
-    def __init__(self,dynamodb):
-        self.table_name =  settings.DDB_TABLE_NAME
+    def __init__(self, dynamodb):
+        self.table_name = settings.DDB_TABLE_NAME
 
         if not self.table_name:
             raise RuntimeError("DDB_TABLE_NAME is not configured")
@@ -21,10 +19,9 @@ class AuditRepo:
         self.deserializer = TypeDeserializer()
         self.serializer = TypeSerializer()
 
-   
     async def get_all_logs(self, user_id: str = None) -> List[AuditLog]:
         try:
-            
+
             params = {
                 "TableName": self.table_name,
                 "KeyConditionExpression": "pk = :pk",

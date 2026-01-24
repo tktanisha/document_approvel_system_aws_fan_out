@@ -1,7 +1,8 @@
 import json
-import boto3
-import os
 import logging
+import os
+
+import boto3
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
@@ -10,8 +11,9 @@ logger.setLevel(logging.INFO)
 dynamodb = boto3.client("dynamodb")
 TABLE_NAME = os.environ.get("DDB_TABLE_NAME")
 
+
 def lambda_handler(event, context):
-    print("records===",event["Records"])
+    print("records===", event["Records"])
     for record in event["Records"]:
         try:
             envelope = json.loads(record["body"])
@@ -21,7 +23,7 @@ def lambda_handler(event, context):
             if not message_str:
                 raise ValueError("No Message field in SNS envelope")
 
-            body = json.loads(message_str)  
+            body = json.loads(message_str)
 
             event_id = body["event_id"]
             event_type = body["event_type"]
@@ -64,13 +66,13 @@ def write_audit_log(event_id: str, event_type: str, payload: dict):
         dynamodb.put_item(
             TableName=TABLE_NAME,
             Item=item,
-            ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)"
+            ConditionExpression="attribute_not_exists(pk) AND attribute_not_exists(sk)",
         )
         logger.info(f"Audit log written for event_id={event_id}")
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             logger.warning(f"Duplicate event ignored: {event_id}")
-            return #lambda will delete msg from sqs since entry exist already
+            return  # lambda will delete msg from sqs since entry exist already
         else:
             raise

@@ -1,12 +1,13 @@
-
 from datetime import datetime, timedelta, timezone
+
 import bcrypt
-from fastapi import HTTPException, status,Depends,Request
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from src.setup.api_settings import AppSettings
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
+
 
 class AuthHelper:
 
@@ -21,38 +22,45 @@ class AuthHelper:
         return bcrypt.checkpw(
             password.encode("utf-8"),
             hashed_password.encode("utf-8"),
-        ) 
+        )
 
     @staticmethod
-    def create_token(user_id: str, role: str,name:str , email:str) -> str:
+    def create_token(user_id: str, role: str, name: str, email: str) -> str:
         now = datetime.now(timezone.utc)
         payload = {
-            "name":str(name),
+            "name": str(name),
             "user_id": str(user_id),
             "role": str(role),
-            "email":str(email),
+            "email": str(email),
             "iat": int(now.timestamp()),
-            "exp": int((now + timedelta(minutes=int(AppSettings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES))).timestamp()),
+            "exp": int(
+                (
+                    now
+                    + timedelta(
+                        minutes=int(AppSettings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+                    )
+                ).timestamp()
+            ),
         }
-        return jwt.encode(payload, AppSettings.JWT_SECRET_KEY, algorithm=AppSettings.JWT_ALGORITHM)
+        return jwt.encode(
+            payload, AppSettings.JWT_SECRET_KEY, algorithm=AppSettings.JWT_ALGORITHM
+        )
 
     @staticmethod
-    def verify_jwt(request:Request, token: str = Depends(oauth2_bearer)):
+    def verify_jwt(request: Request, token: str = Depends(oauth2_bearer)):
         try:
             claims = jwt.decode(
                 token,
                 AppSettings.JWT_SECRET_KEY,
-                algorithms=[AppSettings.JWT_ALGORITHM]
+                algorithms=[AppSettings.JWT_ALGORITHM],
             )
         except ExpiredSignatureError:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
             )
         except JWTError:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
 
-        request.state.user=claims
+        request.state.user = claims

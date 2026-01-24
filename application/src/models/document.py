@@ -1,10 +1,12 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel
 from src.enums.document_status import DocumentStatus
 
+
 class Document(BaseModel):
-    id:str
+    id: str
     author_id: str
     status: DocumentStatus
     s3_path: str

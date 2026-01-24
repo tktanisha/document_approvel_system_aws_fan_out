@@ -12,6 +12,7 @@ passlib = {extras = ["bcrypt"], version = "*"}
 botocore = "*"
 pydantic = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
+pre-commit = "*"
 
 [dev-packages]
 

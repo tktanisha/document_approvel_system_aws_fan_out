@@ -1,21 +1,22 @@
-
-from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 import asyncio
-from src.setup.api_settings import AppSettings
-from src.models.user import User
-from src.enums.user_role import Role
-from src.exceptions.app_exceptions import(
-    NotFoundException, 
-    InternalServerException,
-      UserAlreadyExistsError
-)
+import logging
 from datetime import datetime, timezone
 from typing import Optional
+
 import botocore
-import logging
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
+from src.enums.user_role import Role
+from src.exceptions.app_exceptions import (
+    InternalServerException,
+    NotFoundException,
+    UserAlreadyExistsError,
+)
+from src.models.user import User
+from src.setup.api_settings import AppSettings
 
 logger = logging.getLogger(__name__)
 settings = AppSettings()
+
 
 class UserRepo:
     def __init__(self, dynamodb):
@@ -30,7 +31,7 @@ class UserRepo:
         try:
             response = self.dynamodb.get_item(
                 TableName=self.table_name,
-                Key={"pk": {"S": "USER"}, "sk": {"S": f"EMAIL#{email}"}}
+                Key={"pk": {"S": "USER"}, "sk": {"S": f"EMAIL#{email}"}},
             )
         except Exception as e:
             logger.exception("DynamoDB get_item failed in find_by_email")
@@ -40,8 +41,10 @@ class UserRepo:
             raise NotFoundException(f"User not found with email {email}")
 
         try:
-            print("response==",response["Item"])
-            raw = {k: self.deserializer.deserialize(v) for k, v in response["Item"].items()}
+            print("response==", response["Item"])
+            raw = {
+                k: self.deserializer.deserialize(v) for k, v in response["Item"].items()
+            }
             raw.pop("pk", None)
             raw.pop("sk", None)
             return User(**raw)
@@ -49,7 +52,6 @@ class UserRepo:
             logger.exception("Failed to deserialize user item from DynamoDB")
             raise InternalServerException("Corrupted user data in database") from e
 
-    
     async def create_user(self, user: User) -> None:
         try:
             payload = user.model_dump()
@@ -59,20 +61,18 @@ class UserRepo:
 
             created_at = payload.get("created_at")
             if isinstance(created_at, datetime):
-                payload["created_at"] = created_at.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
+                payload["created_at"] = (
+                    created_at.replace(tzinfo=timezone.utc)
+                    .isoformat()
+                    .replace("+00:00", "Z")
+                )
 
-            item_email = {
-                "pk": "USER",
-                "sk": f"EMAIL#{payload['email']}",
-                **payload
+            item_email = {"pk": "USER", "sk": f"EMAIL#{payload['email']}", **payload}
+            item_email_ddb = {
+                k: self.serializer.serialize(v) for k, v in item_email.items()
             }
-            item_email_ddb = {k: self.serializer.serialize(v) for k, v in item_email.items()}
 
-            item_id = {
-                "pk": "USER",
-                "sk": f"ID#{payload['id']}",
-                **payload
-            }
+            item_id = {"pk": "USER", "sk": f"ID#{payload['id']}", **payload}
             item_id_ddb = {k: self.serializer.serialize(v) for k, v in item_id.items()}
 
             self.dynamodb.transact_write_items(
@@ -81,16 +81,16 @@ class UserRepo:
                         "Put": {
                             "TableName": self.table_name,
                             "Item": item_email_ddb,
-                            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+                            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)",
                         }
                     },
                     {
                         "Put": {
                             "TableName": self.table_name,
                             "Item": item_id_ddb,
-                            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+                            "ConditionExpression": "attribute_not_exists(pk) AND attribute_not_exists(sk)",
                         }
-                    }
+                    },
                 ]
             )
 
@@ -106,19 +106,12 @@ class UserRepo:
             logger.exception("Unexpected error during user creation")
             raise InternalServerException("Unexpected repository failure") from e
 
-
-        
     async def find_by_id(self, user_id: int) -> Optional[User]:
         try:
-            key = {
-                "pk": {"S": "USER"},
-                "sk": {"S": f"ID#{user_id}"}
-            }
+            key = {"pk": {"S": "USER"}, "sk": {"S": f"ID#{user_id}"}}
 
             response = await asyncio.to_thread(
-                self.dynamodb.get_item,
-                TableName=self.table_name,
-                Key=key
+                self.dynamodb.get_item, TableName=self.table_name, Key=key
             )
 
             item = response.get("Item")
@@ -133,7 +126,9 @@ class UserRepo:
                 email=doc.get("email"),
                 password_hash=doc.get("password_hash"),
                 role=Role(doc.get("role")),
-                created_at=datetime.fromisoformat(doc.get("created_at").replace("Z", "+00:00"))
+                created_at=datetime.fromisoformat(
+                    doc.get("created_at").replace("Z", "+00:00")
+                ),
             )
 
         except botocore.exceptions.ClientError as e:

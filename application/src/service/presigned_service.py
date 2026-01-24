@@ -1,13 +1,12 @@
-import uuid
-import boto3
-from datetime import datetime
 import logging
-from src.enums.document_status import DocumentStatus
+import uuid
+
+import boto3
+from src.dto.document import PresignRequest, PresignResponse
 from src.exceptions.app_exceptions import InternalServerException
-from src.models.document import Document
-from src.dto.document import PresignRequest,PresignResponse,CreateDocumentRequest
 
 logger = logging.getLogger(__name__)
+
 
 class PresignedService:
 
@@ -15,7 +14,7 @@ class PresignedService:
         self.s3 = boto3.client("s3")
         self.bucket_name = "my-doc-approval-bucket"
 
-    async def generate_presigned_url(self, presigned_request:PresignRequest):
+    async def generate_presigned_url(self, presigned_request: PresignRequest):
         document_id = str(uuid.uuid4())
         file_key = f"documents/{document_id}/{presigned_request.filename}"
 
@@ -25,27 +24,25 @@ class PresignedService:
                 Params={
                     "Bucket": self.bucket_name,
                     "Key": file_key,
-                    "ContentType": presigned_request.content_type
+                    "ContentType": presigned_request.content_type,
                 },
-                ExpiresIn=1000
+                ExpiresIn=1000,
             )
         except Exception as e:
             logger.exception("Failed to generate presigned url")
             raise InternalServerException("Failed to generate upload URL") from e
 
-        presign_response = PresignResponse(document_id=document_id,upload_url= upload_url,file_key= file_key)
+        presign_response = PresignResponse(
+            document_id=document_id, upload_url=upload_url, file_key=file_key
+        )
         return presign_response
 
-    
     async def generate_presigned_get_url(self, file_key: str):
         try:
             get_url = self.s3.generate_presigned_url(
                 ClientMethod="get_object",
-                Params={
-                    "Bucket": self.bucket_name,
-                    "Key": file_key
-                },
-                ExpiresIn=3600  # URL valid for 1 hour
+                Params={"Bucket": self.bucket_name, "Key": file_key},
+                ExpiresIn=1000,
             )
             return get_url
 

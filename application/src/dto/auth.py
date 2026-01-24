@@ -1,5 +1,7 @@
-from pydantic import BaseModel,Field,EmailStr,field_validator
 import re
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
 
 class RegisterRequest(BaseModel):
     model_config = {
@@ -10,8 +12,7 @@ class RegisterRequest(BaseModel):
 
     name: str = Field(min_lenght=3)
     email: EmailStr
-    password:str
-
+    password: str
 
     @field_validator("password")
     def _validate_password(cls, v):
@@ -51,4 +52,3 @@ class LoginRequest(BaseModel):
         if not re.search(r"[a-z]", v):
             raise ValueError("password must contain at least one lowercase letter")
         return v
-

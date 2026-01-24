@@ -1,10 +1,10 @@
-import boto3
 import json
-from src.setup.api_settings import AppSettings 
+
+import boto3
 
 
 class EventPublisher:
-    def __init__(self,TOPIC_ARN:str):
+    def __init__(self, TOPIC_ARN: str):
         self.client = boto3.client("sns")
         self.topic_arn = TOPIC_ARN
 
@@ -13,9 +13,6 @@ class EventPublisher:
             TopicArn=self.topic_arn,
             Message=json.dumps(event),
             MessageAttributes={
-                "consumer": {
-                    "DataType": "String",
-                    "StringValue": consumer
-                }
-            }
+                "consumer": {"DataType": "String", "StringValue": consumer}
+            },
         )
