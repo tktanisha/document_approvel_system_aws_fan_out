@@ -13,7 +13,6 @@ TABLE_NAME = os.environ.get("DDB_TABLE_NAME")
 
 
 def lambda_handler(event, context):
-    print("records===", event["Records"])
     for record in event["Records"]:
         try:
             envelope = json.loads(record["body"])
@@ -33,7 +32,7 @@ def lambda_handler(event, context):
 
         except Exception:
             logger.exception("Failed processing audit event")
-            raise  # let SQS retry
+            raise  
 
 
 def write_audit_log(event_id: str, event_type: str, payload: dict):
@@ -73,6 +72,6 @@ def write_audit_log(event_id: str, event_type: str, payload: dict):
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             logger.warning(f"Duplicate event ignored: {event_id}")
-            return  # lambda will delete msg from sqs since entry exist already
+            return   
         else:
             raise

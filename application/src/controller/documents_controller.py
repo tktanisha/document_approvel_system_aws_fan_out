@@ -2,13 +2,13 @@ from enum import Enum
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, status
-from src.dto.document import CreateDocumentRequest, UpdateStatusRequest
-from src.helpers.api_paths import ApiPaths
-from src.helpers.auth_helper import AuthHelper
-from src.helpers.success_response import write_success_response
-from src.service.document_service import DocumentService
-from src.service.presigned_service import PresignedService
-from src.setup.dependecies.document_dependency import get_document_service
+from dto.document import CreateDocumentRequest, UpdateStatusRequest
+from helpers.api_paths import ApiPaths
+from helpers.auth_helper import AuthHelper
+from helpers.success_response import write_success_response
+from service.document_service import DocumentService
+from service.presigned_service import PresignedService
+from setup.dependecies.document_dependency import get_document_service
 
 router = APIRouter(tags=["Documents"], dependencies=[Depends(AuthHelper.verify_jwt)])
 

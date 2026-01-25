@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi import Depends
-from src.repository.user_repository import UserRepo
-from src.service.auth_service import AuthService
-from src.setup.db_connection import get_dynamodb
+from repository.user_repository import UserRepo
+from service.auth_service import AuthService
+from setup.db_connection import get_dynamodb
 
 
 def get_user_repo(dynamodb=Depends(get_dynamodb)) -> UserRepo:

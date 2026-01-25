@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-from src.enums.document_status import DocumentStatus
+from enums.document_status import DocumentStatus
 
 
 class PresignRequest(BaseModel):

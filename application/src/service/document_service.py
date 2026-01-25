@@ -3,21 +3,21 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from src.dto.document import CreateDocumentRequest
-from src.enums.document_status import DocumentStatus
-from src.exceptions.app_exceptions import (
+from dto.document import CreateDocumentRequest
+from enums.document_status import DocumentStatus
+from exceptions.app_exceptions import (
     BadRequestException,
     DocumentServiceError,
     ForbiddenException,
     InternalServerException,
     NotFoundException,
 )
-from src.models.document import Document
-from src.repository.audit_repository import AuditRepo
-from src.repository.document_repository import DocumentRepo
-from src.repository.user_repository import UserRepo
-from src.service.event_publisher_service import EventPublisher
-from src.setup.api_settings import AppSettings
+from models.document import Document
+from repository.audit_repository import AuditRepo
+from repository.document_repository import DocumentRepo
+from repository.user_repository import UserRepo
+from service.event_publisher_service import EventPublisher
+from setup.api_settings import AppSettings
 
 settings = AppSettings()
 logger = logging.getLogger(__name__)
@@ -128,10 +128,9 @@ class DocumentService:
 
         old_status = doc.status
 
-        # valid transitions
         if old_status == DocumentStatus.PENDING:
             if new_status not in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
-                raise BadRequestException("cannot move from PENDING to given status")
+                raise BadRequestException(f"cannot move from PENDING to given {new_status}")
 
         if old_status in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
             if new_status == old_status:
@@ -166,12 +165,10 @@ class DocumentService:
             },
         }
 
-        # Publish for audit
         await self.event_publisher_service.publish_status_updated(
             event=event, consumer="AUDIT"
         )
 
-        # Publish for noti
         await self.event_publisher_service.publish_status_updated(
             event=event, consumer="NOTIFY"
         )

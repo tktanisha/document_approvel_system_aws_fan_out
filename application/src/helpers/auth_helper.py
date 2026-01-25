@@ -4,7 +4,7 @@ import bcrypt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import ExpiredSignatureError, JWTError, jwt
-from src.setup.api_settings import AppSettings
+from setup.api_settings import AppSettings
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 

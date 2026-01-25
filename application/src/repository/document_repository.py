@@ -3,10 +3,10 @@ from typing import List, Optional
 
 import botocore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from src.enums.document_status import DocumentStatus
-from src.exceptions.app_exceptions import InternalServerException, NotFoundException
-from src.models.document import Document
-from src.setup.api_settings import AppSettings
+from enums.document_status import DocumentStatus
+from exceptions.app_exceptions import InternalServerException, NotFoundException
+from models.document import Document
+from setup.api_settings import AppSettings
 
 
 class DocumentRepo:
@@ -22,7 +22,7 @@ class DocumentRepo:
 
             for k, v in d.items():
                 if isinstance(v, datetime):
-                    d[k] = v.isoformat()  # to convert time into string for ddb
+                    d[k] = v.isoformat() 
 
             ddb_item = {k: self.serializer.serialize(v) for k, v in d.items()}
 
@@ -79,7 +79,6 @@ class DocumentRepo:
     async def get_documents(
         self, user_ctx: dict, status: Optional[str]
     ) -> List[Document]:
-        print("status=", status)
         user_id = user_ctx["user_id"]
         role = user_ctx["role"]
 
@@ -99,7 +98,6 @@ class DocumentRepo:
             KeyConditionExpression="pk = :pk",
             ExpressionAttributeValues={":pk": {"S": pk}},
         )
-        print("response ==", resp)
         items = resp.get("Items", [])
         if not items:
             raise NotFoundException("No documents found")
@@ -137,7 +135,6 @@ class DocumentRepo:
         self, doc: Document, new_status: DocumentStatus, comment: str, now: datetime
     ):
 
-        old_status = doc.status
 
         updated_doc = Document(
             id=doc.id,
@@ -154,7 +151,6 @@ class DocumentRepo:
         enc["created_at"] = updated_doc.created_at.isoformat().replace("+00:00", "Z")
         enc["updated_at"] = updated_doc.updated_at.isoformat().replace("+00:00", "Z")
 
-        enc_ddb = {k: self.serializer.serialize(v) for k, v in enc.items()}
 
         tx = []
 
@@ -200,103 +196,6 @@ class DocumentRepo:
                 }
             }
         )
-
-        if old_status == new_status:
-            tx.append(
-                {
-                    "Update": {
-                        "TableName": self.table,
-                        "Key": {
-                            "pk": {
-                                "S": f"AUTHOR#{doc.author_id}#STATUS#{old_status.value}"
-                            },
-                            "sk": {"S": f"DOC#{doc.id}"},
-                        },
-                        "UpdateExpression": "SET #c = :c, #u = :u",
-                        "ExpressionAttributeNames": {
-                            "#c": "comment",
-                            "#u": "updated_at",
-                        },
-                        "ExpressionAttributeValues": {
-                            ":c": self.serializer.serialize(comment),
-                            ":u": {"S": enc["updated_at"]},
-                        },
-                    }
-                }
-            )
-
-            tx.append(
-                {
-                    "Update": {
-                        "TableName": self.table,
-                        "Key": {
-                            "pk": {"S": f"APPROVER#STATUS#{old_status.value}"},
-                            "sk": {"S": f"DOC#{doc.id}"},
-                        },
-                        "UpdateExpression": "SET #c = :c, #u = :u",
-                        "ExpressionAttributeNames": {
-                            "#c": "comment",
-                            "#u": "updated_at",
-                        },
-                        "ExpressionAttributeValues": {
-                            ":c": self.serializer.serialize(comment),
-                            ":u": {"S": enc["updated_at"]},
-                        },
-                    }
-                }
-            )
-        else:
-            tx.append(
-                {
-                    "Delete": {
-                        "TableName": self.table,
-                        "Key": {
-                            "pk": {
-                                "S": f"AUTHOR#{doc.author_id}#STATUS#{old_status.value}"
-                            },
-                            "sk": {"S": f"DOC#{doc.id}"},
-                        },
-                    }
-                }
-            )
-            tx.append(
-                {
-                    "Delete": {
-                        "TableName": self.table,
-                        "Key": {
-                            "pk": {"S": f"APPROVER#STATUS#{old_status.value}"},
-                            "sk": {"S": f"DOC#{doc.id}"},
-                        },
-                    }
-                }
-            )
-
-            tx.append(
-                {
-                    "Put": {
-                        "TableName": self.table,
-                        "Item": {
-                            "pk": {
-                                "S": f"AUTHOR#{doc.author_id}#STATUS#{new_status.value}"
-                            },
-                            "sk": {"S": f"DOC#{doc.id}"},
-                            **enc_ddb,
-                        },
-                    }
-                }
-            )
-            tx.append(
-                {
-                    "Put": {
-                        "TableName": self.table,
-                        "Item": {
-                            "pk": {"S": f"APPROVER#STATUS#{new_status.value}"},
-                            "sk": {"S": f"DOC#{doc.id}"},
-                            **enc_ddb,
-                        },
-                    }
-                }
-            )
 
         try:
             self.ddb.transact_write_items(TransactItems=tx)

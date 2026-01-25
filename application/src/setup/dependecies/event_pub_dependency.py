@@ -1,5 +1,5 @@
-from src.service.event_publisher_service import EventPublisher
-from src.setup.api_settings import AppSettings
+from service.event_publisher_service import EventPublisher
+from setup.api_settings import AppSettings
 
 settings = AppSettings()
 

@@ -1,9 +1,9 @@
 from typing import Annotated
 
 from fastapi import Depends
-from src.repository.audit_repository import AuditRepo
-from src.service.audit_service import AuditService
-from src.setup.db_connection import get_dynamodb
+from repository.audit_repository import AuditRepo
+from service.audit_service import AuditService
+from setup.db_connection import get_dynamodb
 
 
 def get_audit_repo(dynamodb=Depends(get_dynamodb)) -> AuditRepo:

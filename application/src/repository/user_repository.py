@@ -5,14 +5,14 @@ from typing import Optional
 
 import botocore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from src.enums.user_role import Role
-from src.exceptions.app_exceptions import (
+from enums.user_role import Role
+from exceptions.app_exceptions import (
     InternalServerException,
     NotFoundException,
     UserAlreadyExistsError,
 )
-from src.models.user import User
-from src.setup.api_settings import AppSettings
+from models.user import User
+from setup.api_settings import AppSettings
 
 logger = logging.getLogger(__name__)
 settings = AppSettings()
@@ -41,7 +41,6 @@ class UserRepo:
             raise NotFoundException(f"User not found with email {email}")
 
         try:
-            print("response==", response["Item"])
             raw = {
                 k: self.deserializer.deserialize(v) for k, v in response["Item"].items()
             }

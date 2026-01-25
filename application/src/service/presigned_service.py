@@ -2,8 +2,8 @@ import logging
 import uuid
 
 import boto3
-from src.dto.document import PresignRequest, PresignResponse
-from src.exceptions.app_exceptions import InternalServerException
+from dto.document import PresignRequest, PresignResponse
+from exceptions.app_exceptions import InternalServerException
 
 logger = logging.getLogger(__name__)
 

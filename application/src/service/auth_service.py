@@ -2,18 +2,18 @@ import logging
 import uuid
 from datetime import datetime
 
-from src.dto.auth import LoginRequest, RegisterRequest
-from src.dto.user import UserResponse
-from src.enums.user_role import Role
-from src.exceptions.app_exceptions import (
+from dto.auth import LoginRequest, RegisterRequest
+from dto.user import UserResponse
+from enums.user_role import Role
+from exceptions.app_exceptions import (
     AuthServiceError,
     BadRequestException,
     NotFoundException,
     UserAlreadyExistsError,
 )
-from src.helpers.auth_helper import AuthHelper
-from src.models.user import User
-from src.repository.user_repository import UserRepo
+from helpers.auth_helper import AuthHelper
+from models.user import User
+from repository.user_repository import UserRepo
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +29,8 @@ class AuthService:
                 raise UserAlreadyExistsError("User Already Exist")
 
         except NotFoundException:
-            # pass since this is good path
             pass
         except UserAlreadyExistsError:
-            # pass it to the global handler
             raise
 
         except Exception as e:

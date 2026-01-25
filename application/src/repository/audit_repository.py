@@ -1,9 +1,9 @@
 from typing import List
 
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
-from src.exceptions.app_exceptions import InternalServerException, NotFoundException
-from src.models.audit_log import AuditLog
-from src.setup.api_settings import AppSettings
+from exceptions.app_exceptions import InternalServerException, NotFoundException
+from models.audit_log import AuditLog
+from setup.api_settings import AppSettings
 
 settings = AppSettings()
 

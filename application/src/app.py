@@ -6,11 +6,11 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from src.controller.audits_controller import router as audit_router
-from src.controller.auth_controller import router as auth_router
-from src.controller.documents_controller import router as document_router
-from src.controller.presigned_controller import router as presigned_url
-from src.exceptions.app_exceptions import AppException
+from controller.audits_controller import router as audit_router
+from controller.auth_controller import router as auth_router
+from controller.documents_controller import router as document_router
+from controller.presigned_controller import router as presigned_url
+from exceptions.app_exceptions import AppException
 
 logger = logging.getLogger(__name__)
 

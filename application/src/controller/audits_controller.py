@@ -1,11 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, status
-from src.helpers.api_paths import ApiPaths
-from src.helpers.auth_helper import AuthHelper
-from src.helpers.success_response import write_success_response
-from src.service.audit_service import AuditService
-from src.setup.dependecies.audit_dependency import get_audit_service
+from helpers.api_paths import ApiPaths
+from helpers.auth_helper import AuthHelper
+from helpers.success_response import write_success_response
+from service.audit_service import AuditService
+from setup.dependecies.audit_dependency import get_audit_service
 
 router = APIRouter(tags=["Audits"], dependencies=[Depends(AuthHelper.verify_jwt)])
 
