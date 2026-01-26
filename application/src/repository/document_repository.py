@@ -22,7 +22,7 @@ class DocumentRepo:
 
             for k, v in d.items():
                 if isinstance(v, datetime):
-                    d[k] = v.isoformat() 
+                    d[k] = v.isoformat()
 
             ddb_item = {k: self.serializer.serialize(v) for k, v in d.items()}
 
@@ -135,7 +135,6 @@ class DocumentRepo:
         self, doc: Document, new_status: DocumentStatus, comment: str, now: datetime
     ):
 
-
         updated_doc = Document(
             id=doc.id,
             author_id=doc.author_id,
@@ -150,7 +149,6 @@ class DocumentRepo:
         enc["status"] = new_status.value
         enc["created_at"] = updated_doc.created_at.isoformat().replace("+00:00", "Z")
         enc["updated_at"] = updated_doc.updated_at.isoformat().replace("+00:00", "Z")
-
 
         tx = []
 

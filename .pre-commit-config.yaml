@@ -28,3 +28,5 @@ repos:
       - id: flake8
         args:
           - --ignore=E501,W503,E402
+
+#pre-commit run --all-files

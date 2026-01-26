@@ -1,10 +1,7 @@
 from typing import List
 
 from enums.user_role import Role
-from exceptions.app_exceptions import (
-    AuditServiceError,
-    BadRequestException,
-)
+from exceptions.app_exceptions import AuditServiceError, BadRequestException
 from models.audit_log import AuditLog
 from repository.audit_repository import AuditRepo
 

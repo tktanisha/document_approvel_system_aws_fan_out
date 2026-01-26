@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AuditQueueArn:
+    Type: String
+  NotificationQueueArn:
+    Type: String
+
+Resources:
+
+  AuditFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: audit-processor-lambda
+      Runtime: python3.11
+      CodeUri: event_processors/audit_processor/
+      Handler: handler.lambda_handler
+      Role: arn:aws:iam::123456789012:role/audit-lambda-role
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: DocumentApproval
+      Events:
+        AuditQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !Ref AuditQueueArn
+            BatchSize: 1
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: notification-processor-lambda
+      Runtime: python3.11
+      CodeUri: event_processors/notification_processor/
+      Handler: handler.lambda_handler
+      Role: arn:aws:iam::123456789012:role/notification-lambda-role
+      Timeout: 30
+      MemorySize: 256
+      ReservedConcurrentExecutions: 1   # SES safe
+      Environment:
+        Variables:
+          FROM_EMAIL: ambitioustanisha@gmail.com
+      Events:
+        NotificationQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !Ref NotificationQueueArn
+            BatchSize: 1   # very important for SES

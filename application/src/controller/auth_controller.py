@@ -1,10 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
 from dto.auth import LoginRequest, RegisterRequest
+from fastapi import APIRouter, Depends, status
 from helpers.api_paths import ApiPaths
 from helpers.success_response import write_success_response
-from models.user import User
 from service.auth_service import AuthService
 from setup.dependecies.auth_dependency import get_auth_service
 

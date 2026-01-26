@@ -130,7 +130,9 @@ class DocumentService:
 
         if old_status == DocumentStatus.PENDING:
             if new_status not in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
-                raise BadRequestException(f"cannot move from PENDING to given {new_status}")
+                raise BadRequestException(
+                    f"cannot move from PENDING to given {new_status}"
+                )
 
         if old_status in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
             if new_status == old_status:

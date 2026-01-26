@@ -32,7 +32,7 @@ def lambda_handler(event, context):
 
         except Exception:
             logger.exception("Failed processing audit event")
-            raise  
+            raise
 
 
 def write_audit_log(event_id: str, event_type: str, payload: dict):
@@ -72,6 +72,6 @@ def write_audit_log(event_id: str, event_type: str, payload: dict):
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             logger.warning(f"Duplicate event ignored: {event_id}")
-            return   
+            return
         else:
             raise

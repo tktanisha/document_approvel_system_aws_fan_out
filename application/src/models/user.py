@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
 from enums.user_role import Role
+from pydantic import BaseModel, EmailStr, Field
 
 
 class User(BaseModel):

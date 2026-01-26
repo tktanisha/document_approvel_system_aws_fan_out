@@ -6,11 +6,7 @@ from typing import Optional
 import botocore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from enums.user_role import Role
-from exceptions.app_exceptions import (
-    InternalServerException,
-    NotFoundException,
-    UserAlreadyExistsError,
-)
+from exceptions.app_exceptions import InternalServerException, UserAlreadyExistsError
 from models.user import User
 from setup.api_settings import AppSettings
 
@@ -34,11 +30,12 @@ class UserRepo:
                 Key={"pk": {"S": "USER"}, "sk": {"S": f"EMAIL#{email}"}},
             )
         except Exception as e:
-            logger.exception("DynamoDB get_item failed in find_by_email")
+            logger.exception(e)
             raise InternalServerException("Failed to fetch user from database") from e
 
-        if "Item" not in response:
-            raise NotFoundException(f"User not found with email {email}")
+        item = response.get("Item")
+        if not item:
+            return None
 
         try:
             raw = {

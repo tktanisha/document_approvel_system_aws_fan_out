@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "S3 bucket for document uploads via presigned URLs"
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: "Unique S3 bucket name for document uploads"
+
+Resources:
+  DocumentUploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+      VersioningConfiguration:
+        Status: Enabled
+
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedMethods:
+              - PUT
+              - POST
+              - GET
+            AllowedHeaders:
+              - "*"
+            ExposedHeaders:
+              - ETag
+            MaxAge: 3000
+
+  DocumentUploadBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DocumentUploadBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowEcsTaskAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecs-fastapi-task-role"
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource:
+              - !Sub "${DocumentUploadBucket.Arn}/*"
+
+Outputs:
+  DocumentUploadBucketName:
+    Value: !Ref DocumentUploadBucket
+
+  DocumentUploadBucketArn:
+    Value: !GetAtt DocumentUploadBucket.Arn

@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  SnsTopicArn:
+    Type: String
+
+Resources:
+
+  NotificationDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: notification-dlq
+
+  AuditDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: audit-dlq
+
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: notify-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt NotificationDLQ.Arn
+        maxReceiveCount: 3
+
+  AuditQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: audits-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt AuditDLQ.Arn
+        maxReceiveCount: 3
+
+  NotificationQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref NotificationQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt NotificationQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref SnsTopicArn
+
+  # Allow SNS to send to SQS
+  AuditQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref AuditQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt AuditQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref SnsTopicArn
+
+  # SNS Subscriptions with Filtering
+
+  AuditSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SnsTopicArn
+      Protocol: sqs
+      Endpoint: !GetAtt AuditQueue.Arn
+      FilterPolicy:
+        consumer:
+          - AUDIT
+
+  NotificationSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SnsTopicArn
+      Protocol: sqs
+      Endpoint: !GetAtt NotificationQueue.Arn
+      FilterPolicy:
+        consumer:
+          - NOTIFY

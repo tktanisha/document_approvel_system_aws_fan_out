@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Request, status
 from dto.document import PresignRequest, PresignResponse
+from fastapi import APIRouter, Depends, Request, status
 from helpers.api_paths import ApiPaths
 from helpers.auth_helper import AuthHelper
 from helpers.success_response import write_success_response
@@ -16,7 +16,6 @@ async def generate_presigned_url(
     payload: PresignRequest,
     presigned_service: PresignedService = Depends(PresignedService),
 ):
-    user_ctx = request.state.user
 
     presigned_response: PresignResponse = (
         await presigned_service.generate_presigned_url(presigned_request=payload)

@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
 from enums.document_status import DocumentStatus
+from pydantic import BaseModel
 
 
 class PresignRequest(BaseModel):
