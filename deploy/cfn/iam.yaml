@@ -19,6 +19,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sns:Publish
+                  #sns --> arn
                 Resource: "*"
 
               # Presigned URL S3 access

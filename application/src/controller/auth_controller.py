@@ -6,6 +6,7 @@ from helpers.api_paths import ApiPaths
 from helpers.success_response import write_success_response
 from service.auth_service import AuthService
 from setup.dependecies.auth_dependency import get_auth_service
+from helpers.common import Common
 
 router = APIRouter(tags=["Auth"])
 
@@ -19,7 +20,7 @@ async def signup(
     await auth_service.register(user_payload)
 
     return write_success_response(
-        status_code=status.HTTP_201_CREATED, message="User Registeration Successfull"
+         status_code=status.HTTP_201_CREATED, message=Common.USER_REGISTRATION_SUCCESS
     )
 
 
@@ -40,5 +41,5 @@ async def login(
                 "role": user.role.value,
             },
         },
-        message="login successfully",
+       message=Common.LOGIN_SUCCESS,
     )

@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, status
 from helpers.api_paths import ApiPaths
 from helpers.auth_helper import AuthHelper
+from helpers.common import Common
 from helpers.success_response import write_success_response
 from service.audit_service import AuditService
 from setup.dependecies.audit_dependency import get_audit_service
@@ -26,5 +27,5 @@ async def get_audit_logs(
             }
             for l in logs
         ],
-        message="audit logs fetched successfully",
+          message=Common.AUDIT_LOGS_FETCH_SUCCESS,
     )

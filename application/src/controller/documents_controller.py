@@ -4,6 +4,8 @@ from typing import Annotated, Optional
 from dto.document import CreateDocumentRequest, UpdateStatusRequest
 from fastapi import APIRouter, Depends, Query, Request, status
 from helpers.api_paths import ApiPaths
+from helpers.common import Common
+from enums.document_status import DocumentStatus
 from helpers.auth_helper import AuthHelper
 from helpers.success_response import write_success_response
 from service.document_service import DocumentService
@@ -13,10 +15,6 @@ from setup.dependecies.document_dependency import get_document_service
 router = APIRouter(tags=["Documents"], dependencies=[Depends(AuthHelper.verify_jwt)])
 
 
-class StatusName(str, Enum):
-    PENDING = "PENDING"
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
 
 
 @router.get(ApiPaths.GET_ALL_DOCUMENTS)
@@ -24,7 +22,7 @@ async def get_all_document(
     request: Request,
     document_service: Annotated[DocumentService, Depends(get_document_service)],
     presigned_service: PresignedService = Depends(PresignedService),
-    doc_status: Optional[StatusName] = Query(default=None, alias="status"),
+    doc_status: Optional[DocumentStatus] = Query(default=None, alias="status"),
 ):
     user_ctx = request.state.user
 
@@ -51,7 +49,7 @@ async def get_all_document(
     return write_success_response(
         status_code=status.HTTP_200_OK,
         data=result,
-        message="Documents fetched successfully",
+        message=Common.DOCUMENT_FETCH_SUCCESS,
     )
 
 
@@ -66,7 +64,7 @@ async def create_document(
     await document_service.create_document(user_ctx=user_ctx, doc_request=payload)
 
     return write_success_response(
-        status_code=status.HTTP_201_CREATED, message="Document created successfully"
+          status_code=status.HTTP_201_CREATED, message=Common.DOCUMENT_CREATE_SUCCESS
     )
 
 
@@ -91,5 +89,6 @@ async def update_document_status(
             "created_at": doc.created_at.isoformat(),
             "updated_at": doc.updated_at.isoformat(),
         },
-        message="status updated successfully",
+         message=Common.STATUS_UPDATE_SUCCESS,
     )
+

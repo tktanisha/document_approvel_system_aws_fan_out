@@ -26,7 +26,7 @@ class PresignedService:
                     "Key": file_key,
                     "ContentType": presigned_request.content_type,
                 },
-                ExpiresIn=1000,
+                ExpiresIn=300,
             )
         except Exception as e:
             logger.exception("Failed to generate presigned url")
