@@ -1,0 +1,375 @@
+{
+  "info": {
+    "_postman_id": "7a0c0578-975c-4150-a40d-7f3c3cd1d561",
+    "name": "document_approvel_system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51899986",
+    "_collection_link": "https://go.postman.co/collection/33025353-7a0c0578-975c-4150-a40d-7f3c3cd1d561?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"tanisha\",\n    \"email\": \"tanisha@sharklasers.com\",\n    \"password\": \"Tanu@12345678\"\n}   ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{document_url}}/auth/register",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "res = pm.response.json();\r",
+              "token = res.data.token\r",
+              "\r",
+              "pm.environment.set(\"token\",token)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"awwptkn@gmail.com\",\r\n    \"password\": \"Tanu@12345678\"\r\n}\r\n// {\r\n//     \"email\": \"ambitioustanisha@gmail.com\",\r\n//     \"password\": \"Tanu@12345678\"\r\n// }\r\n// {\r\n//  \"email\": \"yashgoyal322023@gmail.com\",\r\n//   \"password\": \"Tanu@12345678\"\r\n//   }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{document_url}}/auth/login",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get-presigned-url",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "res= pm.response.json()\r",
+              "\r",
+              "upload_url = res.data.upload_url\r",
+              "\r",
+              "pm.environment.set(\"upload_url\", upload_url)    \r",
+              "\r",
+              "pm.environment.set(\"document_id\", res.data.document_id)     \r",
+              "\r",
+              "pm.environment.set(\"file_key\", res.data.file_key)   "
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"filename\": \"atomic habit.webp\",\r\n  \"content_type\": \"image/webp\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{document_url}}/documents/presign",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "documents",
+            "presign"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "upload_url",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "file",
+          "file": {
+            "src": "7yer0TlfY/hello.txt"
+          }
+        },
+        "url": {
+          "raw": "{{upload_url}}",
+          "host": [
+            "{{upload_url}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get_all_docs",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{document_url}}/documents",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "documents"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "PENDING",
+              "disabled": true
+            },
+            {
+              "key": "status",
+              "value": "APPROVED",
+              "type": "text",
+              "disabled": true
+            },
+            {
+              "key": "status",
+              "value": "REJECTED",
+              "type": "text",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create_docs",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"document_id\": \"{{document_id}}\",\r\n    \"file_key\":\"{{file_key}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{document_url}}/documents",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "documents"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update_status",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n{\r\n  \"status\": \"APPROVED\",\r\n  \"comment\": \"looks good\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{document_url}}/documents/{{document_id}}",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "documents",
+            "{{document_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get_all_audit_logs",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{document_url}}/auditlogs",
+          "host": [
+            "{{document_url}}"
+          ],
+          "path": [
+            "auditlogs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "https://my-doc-approval-bucket.s3.amazonaws.com/documents/decb5c5b-5e7f-4239-9962-5b0e68aa4c29/Flask%20%281%29.pdf",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://my-doc-approval-bucket.s3.amazonaws.com/documents/decb5c5b-5e7f-4239-9962-5b0e68aa4c29/Flask%20%281%29.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVUBZONX2HUR7E572%2F20260122%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20260122T110331Z&X-Amz-Expires=1000&X-Amz-SignedHeaders=content-type%3Bhost&X-Amz-Signature=7a945afc76a8e01222901551a14a284609e8be20a1e704fbe27d4ba9c2b37337",
+          "protocol": "https",
+          "host": [
+            "my-doc-approval-bucket",
+            "s3",
+            "amazonaws",
+            "com"
+          ],
+          "path": [
+            "documents",
+            "decb5c5b-5e7f-4239-9962-5b0e68aa4c29",
+            "Flask%20%281%29.pdf"
+          ],
+          "query": [
+            {
+              "key": "X-Amz-Algorithm",
+              "value": "AWS4-HMAC-SHA256"
+            },
+            {
+              "key": "X-Amz-Credential",
+              "value": "AKIAVUBZONX2HUR7E572%2F20260122%2Fap-south-1%2Fs3%2Faws4_request"
+            },
+            {
+              "key": "X-Amz-Date",
+              "value": "20260122T110331Z"
+            },
+            {
+              "key": "X-Amz-Expires",
+              "value": "1000"
+            },
+            {
+              "key": "X-Amz-SignedHeaders",
+              "value": "content-type%3Bhost"
+            },
+            {
+              "key": "X-Amz-Signature",
+              "value": "7a945afc76a8e01222901551a14a284609e8be20a1e704fbe27d4ba9c2b37337"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
