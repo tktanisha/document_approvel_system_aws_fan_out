@@ -42,7 +42,7 @@ class PresignedService:
             get_url = self.s3.generate_presigned_url(
                 ClientMethod="get_object",
                 Params={"Bucket": self.bucket_name, "Key": file_key},
-                ExpiresIn=1000,
+                ExpiresIn=300,
             )
             return get_url
 

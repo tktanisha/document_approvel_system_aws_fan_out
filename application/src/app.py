@@ -23,15 +23,6 @@ app = FastAPI(
 )
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 app.include_router(auth_router)
 app.include_router(audit_router)
 app.include_router(document_router)
@@ -58,6 +49,14 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={
             "success": False,
-            "error": "Something went wrong. Please try again later.",
+            "error": f"Something went wrong. Please try again later ,error = {exc}",
         },
     )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

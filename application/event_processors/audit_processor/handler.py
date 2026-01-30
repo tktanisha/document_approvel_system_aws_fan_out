@@ -25,17 +25,16 @@ def lambda_handler(event, context):
             body = json.loads(message_str)
 
             event_id = body["event_id"]
-            event_type = body["event_type"]
             payload = body["payload"]
 
-            write_audit_log(event_id, event_type, payload)
+            write_audit_log(event_id, payload)
 
         except Exception:
             logger.exception("Failed processing audit event")
             raise
 
 
-def write_audit_log(event_id: str, event_type: str, payload: dict):
+def write_audit_log(event_id: str, payload: dict):
     author_id = payload.get("author_id")
     approver_id = payload.get("approver_id")
     doc_id = payload.get("doc_id")
