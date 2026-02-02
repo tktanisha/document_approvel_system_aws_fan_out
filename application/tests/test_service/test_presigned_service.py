@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from service.presigned_service import PresignedService
 from dto.document import PresignRequest
 from exceptions.app_exceptions import InternalServerException
+from service.presigned_service import PresignedService
 
 
 class TestPresignedService(unittest.IsolatedAsyncioTestCase):
@@ -18,8 +18,7 @@ class TestPresignedService(unittest.IsolatedAsyncioTestCase):
         service = PresignedService()
 
         presign_request = PresignRequest(
-            filename="test.pdf",
-            content_type="application/pdf"
+            filename="test.pdf", content_type="application/pdf"
         )
 
         response = await service.generate_presigned_url(presign_request)
@@ -40,8 +39,7 @@ class TestPresignedService(unittest.IsolatedAsyncioTestCase):
         service = PresignedService()
 
         presign_request = PresignRequest(
-            filename="test.pdf",
-            content_type="application/pdf"
+            filename="test.pdf", content_type="application/pdf"
         )
 
         with self.assertRaises(InternalServerException):
@@ -56,9 +54,7 @@ class TestPresignedService(unittest.IsolatedAsyncioTestCase):
 
         service = PresignedService()
 
-        result = await service.generate_presigned_get_url(
-            "documents/123/test.pdf"
-        )
+        result = await service.generate_presigned_get_url("documents/123/test.pdf")
 
         self.assertEqual(result, "get-url")
         mock_s3_client.generate_presigned_url.assert_called_once()
@@ -73,6 +69,4 @@ class TestPresignedService(unittest.IsolatedAsyncioTestCase):
         service = PresignedService()
 
         with self.assertRaises(InternalServerException):
-            await service.generate_presigned_get_url(
-                "documents/123/test.pdf"
-            )
+            await service.generate_presigned_get_url("documents/123/test.pdf")

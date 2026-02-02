@@ -1,9 +1,8 @@
-import unittest
 import json
+import unittest
 from unittest.mock import patch
 
 import botocore
-
 from audit_processor.handler import lambda_handler, write_audit_log
 
 
@@ -14,18 +13,22 @@ class TestAuditLambda(unittest.TestCase):
         event = {
             "Records": [
                 {
-                    "body": json.dumps({
-                        "Message": json.dumps({
-                            "event_id": "event-1",
-                            "event_type": "DOCUMENT_STATUS_UPDATED",
-                            "payload": {
-                                "doc_id": "doc-1",
-                                "author_id": "user-1",
-                                "new_status": "APPROVED",
-                                "timestamp": "2024-01-01T10:00:00Z"
-                            }
-                        })
-                    })
+                    "body": json.dumps(
+                        {
+                            "Message": json.dumps(
+                                {
+                                    "event_id": "event-1",
+                                    "event_type": "DOCUMENT_STATUS_UPDATED",
+                                    "payload": {
+                                        "doc_id": "doc-1",
+                                        "author_id": "user-1",
+                                        "new_status": "APPROVED",
+                                        "timestamp": "2024-01-01T10:00:00Z",
+                                    },
+                                }
+                            )
+                        }
+                    )
                 }
             ]
         }
@@ -36,15 +39,10 @@ class TestAuditLambda(unittest.TestCase):
 
     @patch("audit_processor.handler.dynamodb")
     def test_duplicate_event_ignored(self, mock_dynamodb):
-        error_response = {
-            "Error": {"Code": "ConditionalCheckFailedException"}
-        }
+        error_response = {"Error": {"Code": "ConditionalCheckFailedException"}}
 
-        mock_dynamodb.put_item.side_effect = (
-            botocore.exceptions.ClientError(
-                error_response,
-                "PutItem"
-            )
+        mock_dynamodb.put_item.side_effect = botocore.exceptions.ClientError(
+            error_response, "PutItem"
         )
 
         write_audit_log(
@@ -54,22 +52,14 @@ class TestAuditLambda(unittest.TestCase):
                 "doc_id": "doc-1",
                 "author_id": "user-1",
                 "status": "APPROVED",
-                "timestamp": "2024-01-01T10:00:00Z"
-            }
+                "timestamp": "2024-01-01T10:00:00Z",
+            },
         )
 
         mock_dynamodb.put_item.assert_called_once()
 
     def test_lambda_handler_missing_message(self):
-        event = {
-            "Records": [
-                {
-                    "body": json.dumps({
-                        "foo": "bar"
-                    })
-                }
-            ]
-        }
+        event = {"Records": [{"body": json.dumps({"foo": "bar"})}]}
 
         with self.assertRaises(Exception):
             lambda_handler(event, context=None)
@@ -86,6 +76,6 @@ class TestAuditLambda(unittest.TestCase):
                     "doc_id": "doc-2",
                     "author_id": "user-2",
                     "status": "REJECTED",
-                    "timestamp": "2024-01-01T10:00:00Z"
-                }
+                    "timestamp": "2024-01-01T10:00:00Z",
+                },
             )

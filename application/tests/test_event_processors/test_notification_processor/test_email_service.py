@@ -8,9 +8,7 @@ class TestEmailService(unittest.TestCase):
 
     @patch("notification_processor.email_service.ses")
     def test_send_email_success(self, mock_ses):
-        mock_ses.send_email.return_value = {
-            "MessageId": "msg-123"
-        }
+        mock_ses.send_email.return_value = {"MessageId": "msg-123"}
 
         send_email(
             to_email="test@example.com",

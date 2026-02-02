@@ -15,28 +15,24 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # Publish to SNS
               - Effect: Allow
                 Action:
                   - sns:Publish
-                  #sns --> arn
-                Resource: "*"
+                Resource: "arn:aws:sns:ap-south-1:386667539956:approvel"
 
-              # Presigned URL S3 access
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:PutObject
-                Resource: "arn:aws:s3:::your-bucket-name/*"
+                Resource: "arn:aws:s3:::my-doc-approval-bucket/*"
 
-              # DynamoDB (documents table)
               - Effect: Allow
                 Action:
                   - dynamodb:GetItem
                   - dynamodb:PutItem
                   - dynamodb:UpdateItem
                   - dynamodb:Query
-                Resource: "*"
+                Resource: "arn:aws:dynamodb:ap-south-1:386667539956:table/documentApprovel"
 
   AuditLambdaRole:
     Type: AWS::IAM::Role
@@ -58,19 +54,17 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # Read from SQS
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: "*"
+                Resource: "arn:aws:sqs:ap-south-1:386667539956:audit-queue"
 
-              # Write to DynamoDB Audit table
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
-                Resource: "*"
+                Resource: "arn:aws:dynamodb:ap-south-1:386667539956:table/documentApprovel"
 
 
   NotificationLambdaRole:
@@ -93,17 +87,14 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # Read from SQS
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: "*"
+                Resource: "arn:aws:sqs:ap-south-1:386667539956:notification-queue"
 
-              # Send email via SES
               - Effect: Allow
                 Action:
                   - ses:SendEmail
-                  - ses:SendRawEmail
                 Resource: "*"

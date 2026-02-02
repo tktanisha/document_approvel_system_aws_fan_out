@@ -27,5 +27,5 @@ async def get_audit_logs(
             }
             for l in logs
         ],
-          message=Common.AUDIT_LOGS_FETCH_SUCCESS,
+        message=Common.AUDIT_LOGS_FETCH_SUCCESS,
     )

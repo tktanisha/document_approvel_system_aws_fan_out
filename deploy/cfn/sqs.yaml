@@ -48,7 +48,6 @@ Resources:
               ArnEquals:
                 aws:SourceArn: !Ref SnsTopicArn
 
-  # Allow SNS to send to SQS
   AuditQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
@@ -66,7 +65,6 @@ Resources:
               ArnEquals:
                 aws:SourceArn: !Ref SnsTopicArn
 
-  # SNS Subscriptions with Filtering
 
   AuditSubscription:
     Type: AWS::SNS::Subscription

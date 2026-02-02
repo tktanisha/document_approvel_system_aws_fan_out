@@ -2,19 +2,17 @@ from enum import Enum
 from typing import Annotated, Optional
 
 from dto.document import CreateDocumentRequest, UpdateStatusRequest
+from enums.document_status import DocumentStatus
 from fastapi import APIRouter, Depends, Query, Request, status
 from helpers.api_paths import ApiPaths
-from helpers.common import Common
-from enums.document_status import DocumentStatus
 from helpers.auth_helper import AuthHelper
+from helpers.common import Common
 from helpers.success_response import write_success_response
 from service.document_service import DocumentService
 from service.presigned_service import PresignedService
 from setup.dependecies.document_dependency import get_document_service
 
 router = APIRouter(tags=["Documents"], dependencies=[Depends(AuthHelper.verify_jwt)])
-
-
 
 
 @router.get(ApiPaths.GET_ALL_DOCUMENTS)
@@ -64,7 +62,7 @@ async def create_document(
     await document_service.create_document(user_ctx=user_ctx, doc_request=payload)
 
     return write_success_response(
-          status_code=status.HTTP_201_CREATED, message=Common.DOCUMENT_CREATE_SUCCESS
+        status_code=status.HTTP_201_CREATED, message=Common.DOCUMENT_CREATE_SUCCESS
     )
 
 
@@ -89,6 +87,5 @@ async def update_document_status(
             "created_at": doc.created_at.isoformat(),
             "updated_at": doc.updated_at.isoformat(),
         },
-         message=Common.STATUS_UPDATE_SUCCESS,
+        message=Common.STATUS_UPDATE_SUCCESS,
     )
-

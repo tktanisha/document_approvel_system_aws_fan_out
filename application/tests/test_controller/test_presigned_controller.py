@@ -1,13 +1,12 @@
 import unittest
-from unittest.mock import Mock, AsyncMock
-
-from fastapi import FastAPI, Request
-from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, Mock
 
 from controller.presigned_controller import router
+from fastapi import FastAPI, Request
+from fastapi.testclient import TestClient
+from helpers.api_paths import ApiPaths
 from helpers.auth_helper import AuthHelper
 from service.presigned_service import PresignedService
-from helpers.api_paths import ApiPaths
 
 
 class TestPresignedController(unittest.TestCase):
@@ -29,9 +28,7 @@ class TestPresignedController(unittest.TestCase):
         self.mock_presigned_service = Mock()
         self.mock_presigned_service.generate_presigned_url = AsyncMock()
 
-        app.dependency_overrides[PresignedService] = (
-            lambda: self.mock_presigned_service
-        )
+        app.dependency_overrides[PresignedService] = lambda: self.mock_presigned_service
 
         self.client = TestClient(app)
 

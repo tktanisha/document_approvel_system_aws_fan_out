@@ -13,12 +13,15 @@ TABLE_NAME = os.environ.get("DDB_TABLE_NAME")
 
 
 def lambda_handler(event, context):
+    batch_failures = []
+
     for record in event["Records"]:
+        message_id = record["messageId"]
+
         try:
             envelope = json.loads(record["body"])
 
             message_str = envelope.get("Message")
-
             if not message_str:
                 raise ValueError("No Message field in SNS envelope")
 
@@ -30,8 +33,14 @@ def lambda_handler(event, context):
             write_audit_log(event_id, payload)
 
         except Exception:
-            logger.exception("Failed processing audit event")
-            raise
+            logger.exception(f"Failed processing audit event. messageId={message_id}")
+            batch_failures.append(
+                {"itemIdentifier": message_id}
+            )
+
+    return {
+        "batchItemFailures": batch_failures
+    }
 
 
 def write_audit_log(event_id: str, payload: dict):

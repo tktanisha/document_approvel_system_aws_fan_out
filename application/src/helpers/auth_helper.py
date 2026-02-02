@@ -35,8 +35,7 @@ class AuthHelper:
             "iat": int(now.timestamp()),
             "exp": int(
                 (
-                    now
-                    + timedelta(
+                    now + timedelta(
                         minutes=int(AppSettings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
                     )
                 ).timestamp()

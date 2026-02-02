@@ -27,7 +27,10 @@ Resources:
           Type: SQS
           Properties:
             Queue: !Ref AuditQueueArn
-            BatchSize: 1
+            BatchSize: 10
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
   NotificationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -38,7 +41,7 @@ Resources:
       Role: arn:aws:iam::123456789012:role/notification-lambda-role
       Timeout: 30
       MemorySize: 256
-      ReservedConcurrentExecutions: 1   # SES safe
+      ReservedConcurrentExecutions: 1   
       Environment:
         Variables:
           FROM_EMAIL: ambitioustanisha@gmail.com
@@ -47,4 +50,4 @@ Resources:
           Type: SQS
           Properties:
             Queue: !Ref NotificationQueueArn
-            BatchSize: 1   # very important for SES
+            BatchSize: 1 
