@@ -12,7 +12,8 @@ class TestAuditLambda(unittest.TestCase):
     def test_lambda_handler_success(self, mock_dynamodb):
         event = {
             "Records": [
-                {
+                {   
+                    "messageId": "id",
                     "body": json.dumps(
                         {
                             "Message": json.dumps(

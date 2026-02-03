@@ -7,6 +7,18 @@ Parameters:
   NotificationQueueArn:
     Type: String
 
+  AuditLambdaRoleArn:
+    Type: String
+
+  NotificationLambdaRoleArn:
+    Type: String
+
+  DocumentTableName:
+    Type: String
+
+  FromEmail:
+    Type: String  
+
 Resources:
 
   AuditFunction:
@@ -16,7 +28,7 @@ Resources:
       Runtime: python3.11
       CodeUri: event_processors/audit_processor/
       Handler: handler.lambda_handler
-      Role: arn:aws:iam::123456789012:role/audit-lambda-role
+      Role: !Ref AuditLambdaRoleArn
       Timeout: 30
       MemorySize: 256
       Environment:
@@ -38,13 +50,13 @@ Resources:
       Runtime: python3.11
       CodeUri: event_processors/notification_processor/
       Handler: handler.lambda_handler
-      Role: arn:aws:iam::123456789012:role/notification-lambda-role
+      Role: !Ref NotificationLambdaRoleArn
       Timeout: 30
       MemorySize: 256
       ReservedConcurrentExecutions: 1   
       Environment:
         Variables:
-          FROM_EMAIL: ambitioustanisha@gmail.com
+          FROM_EMAIL: !Ref FromEmail
       Events:
         NotificationQueueEvent:
           Type: SQS

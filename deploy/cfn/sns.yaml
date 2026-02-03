@@ -6,6 +6,10 @@ Resources:
     Properties:
       TopicName: document-events-topic
 
+      Tags:
+        - Key: Service
+          Value: document-approval
+
 Outputs:
   DocumentEventsTopicArn:
     Description: SNS Topic ARN

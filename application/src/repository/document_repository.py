@@ -7,7 +7,8 @@ from enums.document_status import DocumentStatus
 from exceptions.app_exceptions import InternalServerException, NotFoundException
 from models.document import Document
 from setup.api_settings import AppSettings
-
+from helpers.common import Common
+from enums.user_role import Role
 
 class DocumentRepo:
     def __init__(self, dynamodb):
@@ -74,7 +75,7 @@ class DocumentRepo:
             self.ddb.transact_write_items(TransactItems=tx)
 
         except botocore.exceptions.ClientError as e:
-            raise InternalServerException("Failed to create document") from e
+            raise InternalServerException(Common.FAILED_CREATE_DOCUMENT) from e
 
     async def get_documents(
         self, user_ctx: dict, status: Optional[str]
@@ -82,7 +83,7 @@ class DocumentRepo:
         user_id = user_ctx["user_id"]
         role = user_ctx["role"]
 
-        if role == "AUTHOR":
+        if role == Role.AUTHOR.value:
             if status:
                 pk = f"AUTHOR#{user_id}#STATUS#{status}"
             else:
@@ -100,7 +101,7 @@ class DocumentRepo:
         )
         items = resp.get("Items", [])
         if not items:
-            raise NotFoundException("No documents found")
+            raise NotFoundException(Common.NO_DOCUMENTS_FOUND)
 
         documents = [
             {k: self.deserializer.deserialize(v) for k, v in it.items()} for it in items
@@ -114,7 +115,7 @@ class DocumentRepo:
             resp = self.ddb.get_item(TableName=self.table, Key=key)
             item = resp.get("Item")
             if not item:
-                raise NotFoundException("document not found")
+                raise NotFoundException(Common.DOCUMENT_NOT_FOUND)
             d = {k: self.deserializer.deserialize(v) for k, v in item.items()}
 
             d["status"] = DocumentStatus(d["status"])
@@ -129,7 +130,9 @@ class DocumentRepo:
         except NotFoundException:
             raise
         except Exception as e:
-            raise InternalServerException(f"failed to fetch document: {e}")
+             raise InternalServerException(
+                Common.FAILED_FETCH_DOCUMENT.format(error=e)
+            )
 
     async def update_status(
         self, doc: Document, new_status: DocumentStatus, comment: str, now: datetime
@@ -200,4 +203,4 @@ class DocumentRepo:
             return updated_doc
 
         except Exception:
-            raise InternalServerException("transaction failed")
+             raise InternalServerException(Common.DOCUMENT_TRANSACTION_FAILED)

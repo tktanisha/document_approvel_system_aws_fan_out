@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 from unittest.mock import MagicMock
-
+from enums.user_role import Role
 import botocore
 from enums.document_status import DocumentStatus
 from exceptions.app_exceptions import InternalServerException, NotFoundException
@@ -55,7 +55,7 @@ class TestDocumentRepo(unittest.IsolatedAsyncioTestCase):
     async def test_get_documents_author_success(self):
         user_ctx = {
             "user_id": "user-1",
-            "role": "AUTHOR",
+            "role": Role.AUTHOR.value,
         }
 
         self.mock_dynamodb.query.return_value = {
@@ -80,7 +80,7 @@ class TestDocumentRepo(unittest.IsolatedAsyncioTestCase):
     async def test_get_documents_not_found(self):
         user_ctx = {
             "user_id": "user-1",
-            "role": "AUTHOR",
+            "role": Role.AUTHOR.value,
         }
 
         self.mock_dynamodb.query.return_value = {"Items": []}

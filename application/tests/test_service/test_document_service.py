@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
-
+from enums.user_role import Role
 from dto.document import CreateDocumentRequest
 from enums.document_status import DocumentStatus
 from exceptions.app_exceptions import BadRequestException, ForbiddenException
@@ -33,7 +33,7 @@ class TestDocumentService(unittest.IsolatedAsyncioTestCase):
 
         self.user_ctx = {
             "user_id": "user-123",
-            "role": "APPROVER",
+            "role": Role.AUTHOR.value,
         }
 
     async def test_create_document_success(self):

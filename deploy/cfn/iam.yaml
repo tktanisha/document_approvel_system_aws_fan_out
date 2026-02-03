@@ -1,3 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "IAM roles for ECS FastAPI service and supporting Lambda functions"
+
+
+Parameters:
+  SnsApprovalTopicArn:
+    Type: String
+    Description: "SNS topic ARN for approval events"
+
+  DocumentBucketArn:
+    Type: String
+    Description: "S3 bucket ARN for document storage"
+
+  DocumentTableArn:
+    Type: String
+    Description: "DynamoDB table ARN for documents"
+
+  AuditQueueArn:
+    Type: String
+    Description: "SQS ARN for audit processing"
+
+  NotificationQueueArn:
+    Type: String
+    Description: "SQS ARN for notification processing"
+
+
 Resources:
   EcsTaskRole:
     Type: AWS::IAM::Role
@@ -18,13 +44,13 @@ Resources:
               - Effect: Allow
                 Action:
                   - sns:Publish
-                Resource: "arn:aws:sns:ap-south-1:386667539956:approvel"
+                Resource: !Ref SnsApprovalTopicArn
 
               - Effect: Allow
                 Action:
                   - s3:GetObject
                   - s3:PutObject
-                Resource: "arn:aws:s3:::my-doc-approval-bucket/*"
+                Resource: !Sub "${DocumentBucketArn}/*"
 
               - Effect: Allow
                 Action:
@@ -32,7 +58,7 @@ Resources:
                   - dynamodb:PutItem
                   - dynamodb:UpdateItem
                   - dynamodb:Query
-                Resource: "arn:aws:dynamodb:ap-south-1:386667539956:table/documentApprovel"
+                Resource: !Ref DocumentTableArn
 
   AuditLambdaRole:
     Type: AWS::IAM::Role
@@ -59,12 +85,12 @@ Resources:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: "arn:aws:sqs:ap-south-1:386667539956:audit-queue"
+                Resource: !Ref AuditQueueArn
 
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
-                Resource: "arn:aws:dynamodb:ap-south-1:386667539956:table/documentApprovel"
+                Resource: !Ref DocumentTableArn
 
 
   NotificationLambdaRole:
@@ -92,7 +118,7 @@ Resources:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: "arn:aws:sqs:ap-south-1:386667539956:notification-queue"
+                Resource: !Ref NotificationQueueArn
 
               - Effect: Allow
                 Action:

@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import Optional
+from helpers.common import Common
 
 import botocore
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
@@ -18,7 +19,7 @@ class UserRepo:
     def __init__(self, dynamodb):
         self.table_name = settings.DDB_TABLE_NAME
         if not self.table_name:
-            raise RuntimeError("DDB_TABLE_NAME is not configured")
+            raise RuntimeError(Common.DDB_TABLE_NAME_NOT_CONFIGURED)
         self.dynamodb = dynamodb
         self.deserializer = TypeDeserializer()
         self.serializer = TypeSerializer()
@@ -31,7 +32,9 @@ class UserRepo:
             )
         except Exception as e:
             logger.exception(e)
-            raise InternalServerException("Failed to fetch user from database") from e
+            raise InternalServerException(
+                Common.FAILED_FETCH_USER_FROM_DB
+            ) from e
 
         item = response.get("Item")
         if not item:
@@ -45,8 +48,10 @@ class UserRepo:
             raw.pop("sk", None)
             return User(**raw)
         except Exception as e:
-            logger.exception("Failed to deserialize user item from DynamoDB")
-            raise InternalServerException("Corrupted user data in database") from e
+            logger.exception(Common.FAILED_DESERIALIZE_USER_ITEM)
+            raise InternalServerException(
+                Common.CORRUPTED_USER_DATA_IN_DB
+            ) from e
 
     async def create_user(self, user: User) -> None:
         try:
@@ -93,14 +98,18 @@ class UserRepo:
         except botocore.exceptions.ClientError as e:
             code = e.response["Error"].get("Code")
             if code == "ConditionalCheckFailedException":
-                raise UserAlreadyExistsError("User already exists") from e
+                raise UserAlreadyExistsError(Common.USER_ALREADY_EXISTS) from e
 
-            logger.exception("DynamoDB transaction failed in create_user")
-            raise InternalServerException("Failed to create user in database") from e
+            logger.exception(Common.USER_REPO_DDB_TX_FAILED)
+            raise InternalServerException(
+                Common.FAILED_CREATE_USER_IN_DB
+            ) from e
 
         except Exception as e:
-            logger.exception("Unexpected error during user creation")
-            raise InternalServerException("Unexpected repository failure") from e
+            logger.exception(Common.UNEXPECTED_ERROR_DURING_USER_CREATION)
+            raise InternalServerException(
+                Common.DOCUMENT_SERVICE_FAILED
+            ) from e
 
     async def find_by_id(self, user_id: int) -> Optional[User]:
         try:
@@ -128,8 +137,13 @@ class UserRepo:
             )
 
         except botocore.exceptions.ClientError as e:
-            logger.exception("failed to find user by id")
-            raise InternalServerException(f"error from user repo : {e}") from e
+            logger.exception(Common.FAILED_FIND_USER_BY_ID)
+            raise InternalServerException(
+                Common.ERROR_FROM_USER_REPO.format(error=e)
+            ) from e
         except Exception as e:
-            logger.exception("unexpected error in find_by_id")
-            raise InternalServerException(f"error from user repo : {e}") from e
+            logger.exception(Common.UNEXPECTED_ERROR_FIND_BY_ID)
+            raise InternalServerException(
+                Common.ERROR_FROM_USER_REPO.format(error=e)
+            ) from e
+        

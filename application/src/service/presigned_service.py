@@ -1,6 +1,6 @@
 import logging
 import uuid
-
+from helpers.common import Common
 import boto3
 from dto.document import PresignRequest, PresignResponse
 from exceptions.app_exceptions import InternalServerException
@@ -29,8 +29,10 @@ class PresignedService:
                 ExpiresIn=300,
             )
         except Exception as e:
-            logger.exception("Failed to generate presigned url")
-            raise InternalServerException("Failed to generate upload URL") from e
+            logger.exception(Common.FAILED_GENERATE_PRESIGNED_URL_LOG)
+            raise InternalServerException(
+                Common.FAILED_GENERATE_UPLOAD_URL
+            ) from e
 
         presign_response = PresignResponse(
             document_id=document_id, upload_url=upload_url, file_key=file_key
@@ -47,5 +49,7 @@ class PresignedService:
             return get_url
 
         except Exception as e:
-            logger.exception("Failed to generate presigned get url")
-            raise InternalServerException("Failed to generate download URL") from e
+            logger.exception(Common.FAILED_GENERATE_PRESIGNED_GET_URL_LOG)
+            raise InternalServerException(
+                Common.FAILED_GENERATE_DOWNLOAD_URL
+            ) from e

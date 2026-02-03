@@ -1,7 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: "SNS to SQS fan-out with audit and notification queues and DLQs"
+
 Parameters:
   SnsTopicArn:
     Type: String
+    Description: "SNS topic ARN for document events"
 
 Resources:
 

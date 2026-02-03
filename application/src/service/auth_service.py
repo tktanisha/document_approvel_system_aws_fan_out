@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import datetime
-
+from helpers.common import Common
 from dto.auth import LoginRequest, RegisterRequest
 from dto.user import UserResponse
 from enums.user_role import Role
@@ -26,10 +26,10 @@ class AuthService:
             existing_user = await self.user_repo.find_by_email(user.email)
         except Exception as e:
             logger.exception(e)
-            raise AuthServiceError("Failed to verify user") from e
+            raise AuthServiceError(Common.AUTH_VERIFY_USER_FAILED) from e
 
         if existing_user:
-            raise UserAlreadyExistsError("User already exists")
+            raise UserAlreadyExistsError(Common.USER_ALREADY_EXISTS)
 
         password_hash = AuthHelper.hash_password(user.password)
 
@@ -47,21 +47,21 @@ class AuthService:
         except UserAlreadyExistsError:
             raise
         except Exception as e:
-            logger.exception("User creation failed")
-            raise AuthServiceError("Failed to register user") from e
+            logger.exception(Common.UNEXPECTED_ERROR_DURING_USER_CREATION)
+            raise AuthServiceError(Common.AUTH_REGISTER_FAILED) from e
 
     async def login(self, user: LoginRequest):
         try:
             user_db = await self.user_repo.find_by_email(user.email)
         except Exception as e:
-            logger.exception("User lookup failed")
-            raise AuthServiceError("Login failed") from e
+            logger.exception(Common.AUTH_LOGIN_FAILED)
+            raise AuthServiceError(Common.AUTH_LOGIN_FAILED) from e
 
         if not user_db:
-            raise BadRequestException("Invalid credentials")
+            raise BadRequestException(Common.INVALID_CREDENTIALS)
 
         if not AuthHelper.verify_password(user.password, user_db.password_hash):
-            raise BadRequestException("Invalid credentials")
+            raise BadRequestException(Common.INVALID_CREDENTIALS)
 
         token = AuthHelper.create_token(
             user_db.id, user_db.role.value, user_db.name, user_db.email

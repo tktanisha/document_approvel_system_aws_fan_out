@@ -5,15 +5,15 @@ from enums.document_status import DocumentStatus
 from pydantic import BaseModel
 
 
-# class PresignRequest(BaseModel):
-#     filename: str
-#     content_type: str
+class PresignRequest(BaseModel):
+    filename: str
+    content_type: str
 
 
-# class PresignResponse(BaseModel):
-#     document_id: str
-#     upload_url: str
-#     file_key: str
+class PresignResponse(BaseModel):
+    document_id: str
+    upload_url: str
+    file_key: str
 
 
 class MultipartInitiateRequest(BaseModel):

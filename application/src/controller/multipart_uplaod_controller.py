@@ -14,7 +14,6 @@ router = APIRouter(
 )
 
 
-# 1️⃣ Initiate multipart upload
 @router.post("/documents/multipart/initiate")
 async def initiate_multipart_upload(
     payload: MultipartInitiateRequest,

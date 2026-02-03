@@ -1,7 +1,7 @@
 import re
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
-
+from helpers.common import Common
 
 class RegisterRequest(BaseModel):
     model_config = {
@@ -17,15 +17,15 @@ class RegisterRequest(BaseModel):
     @field_validator("password")
     def _validate_password(cls, v):
         if len(v) < 12:
-            raise ValueError("password must be at least 12 characters")
+            raise ValueError(Common.PASSWORD_MIN_LENGTH)
         if not re.search(r"[0-9]", v):
-            raise ValueError("password must contain at least one digit")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_DIGIT)
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
-            raise ValueError("password must contain at least one special character")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_SPECIAL_CHAR)
         if not re.search(r"[A-Z]", v):
-            raise ValueError("password must contain at least one uppercase letter")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_UPPERCASE)
         if not re.search(r"[a-z]", v):
-            raise ValueError("password must contain at least one lowercase letter")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_LOWERCASE)
         return v
 
 
@@ -42,13 +42,13 @@ class LoginRequest(BaseModel):
     @field_validator("password")
     def _validate_password(cls, v):
         if len(v) < 12:
-            raise ValueError("password must be at least 12 characters")
+            raise ValueError(Common.PASSWORD_MIN_LENGTH)
         if not re.search(r"[0-9]", v):
-            raise ValueError("password must contain at least one digit")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_DIGIT)
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
-            raise ValueError("password must contain at least one special character")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_SPECIAL_CHAR)
         if not re.search(r"[A-Z]", v):
-            raise ValueError("password must contain at least one uppercase letter")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_UPPERCASE)
         if not re.search(r"[a-z]", v):
-            raise ValueError("password must contain at least one lowercase letter")
+            raise ValueError(Common.PASSWORD_MUST_CONTAIN_LOWERCASE)
         return v

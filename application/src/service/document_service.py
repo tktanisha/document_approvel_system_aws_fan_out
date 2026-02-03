@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from dto.document import CreateDocumentRequest
 from enums.document_status import DocumentStatus
+from enums.user_role import Role
 from exceptions.app_exceptions import (
     BadRequestException,
     DocumentServiceError,
@@ -12,6 +13,7 @@ from exceptions.app_exceptions import (
     InternalServerException,
     NotFoundException,
 )
+from helpers.common import Common
 from models.document import Document
 from repository.audit_repository import AuditRepo
 from repository.document_repository import DocumentRepo
@@ -40,11 +42,11 @@ class DocumentService:
     async def create_document(self, user_ctx, doc_request: CreateDocumentRequest):
 
         if not user_ctx:
-            raise BadRequestException("unauthorized or invalid user context")
+            raise BadRequestException(Common.UNAUTHORIZED_OR_INVALID_USER_CONTEXT)
 
         user_id = user_ctx.get("user_id")
         if not user_id:
-            raise BadRequestException("missing user id in context")
+            raise BadRequestException(Common.MISSING_USER_ID_IN_CONTEXT)
 
         file_key = doc_request.file_key
         now = datetime.now()
@@ -62,8 +64,8 @@ class DocumentService:
         try:
             await self.document_repo.create_document(document)
         except Exception as e:
-            logger.exception("Failed to create document metadata")
-            raise InternalServerException("Failed to create document") from e
+            logger.exception(Common.FAILED_CREATE_DOCUMENT_METADATA_LOG)
+            raise InternalServerException(Common.FAILED_CREATE_DOCUMENT) from e
 
         event_id = str(uuid.uuid4())
 
@@ -87,11 +89,11 @@ class DocumentService:
     ) -> List[Document]:
 
         if not user_ctx:
-            raise BadRequestException("unauthorized or invalid user context")
+            raise BadRequestException(Common.UNAUTHORIZED_OR_INVALID_USER_CONTEXT)
 
         user_id = user_ctx.get("user_id")
         if not user_id:
-            raise BadRequestException("missing user id in context")
+            raise BadRequestException(Common.MISSING_USER_ID_IN_CONTEXT)
 
         try:
             docs: List[Document] = await self.document_repo.get_documents(
@@ -103,7 +105,9 @@ class DocumentService:
             logger.exception(f"error in the not found={e}")
             raise
         except Exception as e:
-            raise DocumentServiceError(f"error occured in document service = {e}")
+            raise DocumentServiceError(
+                Common.DOCUMENT_SERVICE_FAILED.format(error=e)
+            )
 
     async def update_status(
         self,
@@ -114,29 +118,33 @@ class DocumentService:
     ) -> Document:
 
         if not user_ctx:
-            raise BadRequestException("invalid user context")
+            raise BadRequestException(Common.INVALID_USER_CONTEXT)
 
-        if user_ctx.get("role") != "APPROVER":
-            raise ForbiddenException("only approver can update status")
+        if user_ctx.get("role") != Role.APPROVER.value:
+            raise ForbiddenException(Common.ONLY_APPROVER_CAN_UPDATE_STATUS)
 
         try:
             doc = await self.document_repo.get_by_id(document_id)
         except NotFoundException:
             raise
         except Exception as e:
-            raise DocumentServiceError(f"failed loading document: {e}")
+            raise DocumentServiceError(
+                Common.FAILED_LOADING_DOCUMENT.format(error=e)
+            )
 
         old_status = doc.status
 
         if old_status == DocumentStatus.PENDING:
             if new_status not in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
                 raise BadRequestException(
-                    f"cannot move from PENDING to given {new_status}"
+                    f"{Common.CANNOT_MOVE_FROM_PENDING} {new_status}"
                 )
 
         if old_status in (DocumentStatus.APPROVED, DocumentStatus.REJECTED):
             if new_status == old_status:
-                raise BadRequestException(f"your status is already {new_status.value} ")
+                raise BadRequestException(
+                    Common.STATUS_ALREADY_VALUE.format(status=new_status.value)
+                )
 
         now = datetime.now(timezone.utc)
 
@@ -148,7 +156,9 @@ class DocumentService:
         except InternalServerException:
             raise
         except Exception as e:
-            raise DocumentServiceError(f"failed updating status: {e}")
+            raise DocumentServiceError(
+                Common.FAILED_UPDATING_STATUS.format(error=e)
+            )
 
         event_id = str(uuid.uuid4())
 

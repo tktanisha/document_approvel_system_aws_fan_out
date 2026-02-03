@@ -1,5 +1,5 @@
 from typing import List
-
+from helpers.common import Common
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from exceptions.app_exceptions import InternalServerException, NotFoundException
 from models.audit_log import AuditLog
@@ -13,7 +13,7 @@ class AuditRepo:
         self.table_name = settings.DDB_TABLE_NAME
 
         if not self.table_name:
-            raise RuntimeError("DDB_TABLE_NAME is not configured")
+            raise RuntimeError(Common.DDB_TABLE_NAME_NOT_CONFIGURED)
 
         self.dynamodb = dynamodb
         self.deserializer = TypeDeserializer()
@@ -39,7 +39,7 @@ class AuditRepo:
 
             items = response.get("Items", [])
             if not items:
-                raise NotFoundException("items not found")
+                raise NotFoundException(Common.ITEMS_NOT_FOUND)
 
             logs = [
                 {k: self.deserializer.deserialize(v) for k, v in it.items()}
@@ -51,4 +51,4 @@ class AuditRepo:
         except NotFoundException:
             raise
         except Exception as e:
-            raise InternalServerException(f"audit repository failure = {e}")
+            raise InternalServerException( Common.AUDIT_REPOSITORY_FAILURE.format(error=e))

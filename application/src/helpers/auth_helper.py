@@ -57,9 +57,9 @@ class AuthHelper:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
             )
-        except JWTError:
+        except JWTError as e:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token={e}"
             )
 
         request.state.user = claims

@@ -12,7 +12,6 @@ class MultipartPresignedService:
         self.s3 = boto3.client("s3")
         self.bucket_name = "my-doc-approval-bucket"
 
-    # 1️⃣ Initiate multipart upload
     async def initiate_multipart_upload(self, filename: str, content_type: str):
         document_id = str(uuid.uuid4())
         file_key = f"documents/{document_id}/{filename}"
@@ -33,7 +32,6 @@ class MultipartPresignedService:
             "file_key": file_key
         }
 
-    # 2️⃣ Generate presigned URL for ONE part
     async def generate_presigned_part_url(
         self, upload_id: str, file_key: str, part_number: int
     ):

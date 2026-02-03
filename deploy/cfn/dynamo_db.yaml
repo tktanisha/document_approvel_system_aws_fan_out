@@ -19,3 +19,7 @@ Resources:
           KeyType: HASH
         - AttributeName: sk
           KeyType: RANGE
+
+      Tags:
+        - Key: Service
+          Value: document-approval    

@@ -6,6 +6,15 @@ Parameters:
     Type: String
     Description: "Unique S3 bucket name for document uploads"
 
+  EcsTaskRoleArn:
+    Type: String
+    Description: "IAM role ARN used by ECS task for S3 access"
+
+  AllowedCorsOrigin:
+    Type: String
+    Description: "Allowed CORS origin for presigned uploads"
+
+
 Resources:
   DocumentUploadBucket:
     Type: AWS::S3::Bucket
@@ -29,7 +38,7 @@ Resources:
       CorsConfiguration:
         CorsRules:
           - AllowedOrigins:
-              - "*"
+              - !Ref AllowedCorsOrigin
             AllowedMethods:
               - PUT
               - POST
@@ -50,7 +59,7 @@ Resources:
           - Sid: AllowEcsTaskAccess
             Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecs-fastapi-task-role"
+              AWS: !Ref EcsTaskRoleArn
             Action:
               - s3:PutObject
               - s3:GetObject
